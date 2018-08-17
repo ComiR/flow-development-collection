@@ -156,14 +156,10 @@ class LoggerFactory
     protected function instantiateThrowableStorage(): ThrowableStorageInterface
     {
         // Fallback early throwable storage
-        $throwableStorage = new FileStorage();
-        $throwableStorage->injectStoragePath(FLOW_PATH_DATA . 'Logs/Exceptions');
-        if (Bootstrap::$staticObjectManager instanceof ObjectManagerInterface) {
-            $throwableStorage = Bootstrap::$staticObjectManager->get(ThrowableStorageInterface::class);
-        }
-        $throwableStorage->setBacktraceRenderer(function ($backtrace) {
-            return Debugger::getBacktraceCode($backtrace, false, true);
-        });
+        $throwableStorage = Bootstrap::$staticObjectManager instanceof ObjectManagerInterface
+            ? Bootstrap::$staticObjectManager->get(ThrowableStorageInterface::class)
+            : new FileStorage()
+        ;
         $throwableStorage->setRequestInformationRenderer($this->requestInfoCallback);
         return $throwableStorage;
     }

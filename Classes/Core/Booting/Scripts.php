@@ -241,9 +241,7 @@ class Scripts
         $configurationManager = $bootstrap->getEarlyInstance(ConfigurationManager::class);
         $settings = $configurationManager->getConfiguration(ConfigurationManager::CONFIGURATION_TYPE_SETTINGS, 'Neos.Flow');
 
-        $throwableStorage = new FileStorage();
-        $throwableStorage->injectStoragePath(FLOW_PATH_DATA . 'Logs/Exceptions');
-        $bootstrap->setEarlyInstance(ThrowableStorageInterface::class, $throwableStorage);
+        $bootstrap->setEarlyInstance(ThrowableStorageInterface::class, new FileStorage());
 
         /** @var PsrLoggerFactoryInterface $psrLoggerFactoryName */
         $psrLoggerFactoryName = $settings['log']['psr3']['loggerFactory'];

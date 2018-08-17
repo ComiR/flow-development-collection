@@ -1,6 +1,7 @@
 <?php
 namespace Neos\Flow\Log\ThrowableStorage;
 
+use Neos\Flow\Error\Debugger;
 use Neos\Flow\Log\PlainTextFormatter;
 use Neos\Flow\Log\ThrowableStorageInterface;
 use Neos\Utility\Files;
@@ -24,6 +25,14 @@ class FileStorage implements ThrowableStorageInterface
      * @var \Closure
      */
     protected $backtraceRenderer;
+
+    public function __construct()
+    {
+        $this->storagePath = FLOW_PATH_DATA . 'Logs/Exceptions';
+        $this->backtraceRenderer = function ($backtrace) {
+            return Debugger::getBacktraceCode($backtrace, false, true);
+        };
+    }
 
     /**
      * FileStorage path.
@@ -129,12 +138,13 @@ class FileStorage implements ThrowableStorageInterface
         }
 
         if ($depth === $maximumDepth) {
-            $postMortemInfo .= PHP_EOL . 'Maximum chainging depth reached ...';
+            $postMortemInfo .= PHP_EOL . 'Maximum chaining depth reached ...';
         }
 
-        $postMortemInfo .= PHP_EOL . $this->renderRequestInfo();
-        $postMortemInfo .= PHP_EOL;
-        $postMortemInfo .= (new PlainTextFormatter($additionalData))->format();
+        $postMortemInfo .= $this->renderRequestInfo();
+        if ($additionalData !== []) {
+            $postMortemInfo .= PHP_EOL . (new PlainTextFormatter($additionalData))->format();
+        }
 
         return $postMortemInfo;
     }
@@ -177,7 +187,7 @@ class FileStorage implements ThrowableStorageInterface
     {
         $output = '';
         if ($this->requestInformationRenderer !== null) {
-            $output = $this->requestInformationRenderer->__invoke();
+            $output = PHP_EOL . ($this->requestInformationRenderer)();
         }
 
         return $output;
