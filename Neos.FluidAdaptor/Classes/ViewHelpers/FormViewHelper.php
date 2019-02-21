@@ -123,6 +123,7 @@ class FormViewHelper extends AbstractFormViewHelper
         $this->registerArgument('actionUri', 'string', 'can be used to overwrite the "action" attribute of the form tag', false, null);
         $this->registerArgument('objectName', 'string', 'name of the object that is bound to this form. If this argument is not specified, the name attribute of this form is used to determine the FormObjectName', false, null);
         $this->registerArgument('useParentRequest', 'boolean', 'If set, the parent Request will be used instead ob the current one', false, false);
+        $this->registerArgument('useMainRequest', 'boolean', 'If set, the main Request will be used instead of the current one. Note: using this argument can be a sign of undesired tight coupling, use with care', false, false);
 
         $this->registerUniversalTagAttributes();
     }
@@ -214,6 +215,12 @@ class FormViewHelper extends AbstractFormViewHelper
                 }
                 $uriBuilder = clone $uriBuilder;
                 $uriBuilder->setRequest($request->getParentRequest());
+            } elseif ($this->arguments['useMainRequest'] === true) {
+                $request = $this->controllerContext->getRequest();
+                if (!$request->isMainRequest()) {
+                    $uriBuilder = clone $uriBuilder;
+                    $uriBuilder->setRequest($request->getMainRequest());
+                }
             }
             $uriBuilder
                 ->reset()
@@ -436,6 +443,8 @@ class FormViewHelper extends AbstractFormViewHelper
         if (!$request->isMainRequest()) {
             if ($this->arguments['useParentRequest'] === true) {
                 return $request->getParentRequest()->getArgumentNamespace();
+            } elseif ($this->arguments['useMainRequest'] === true) {
+                return $request->getMainRequest()->getArgumentNamespace();
             } else {
                 return $request->getArgumentNamespace();
             }
