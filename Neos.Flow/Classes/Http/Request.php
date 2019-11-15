@@ -509,7 +509,12 @@ class Request extends BaseRequest implements ServerRequestInterface
      */
     public function getScriptRequestPath()
     {
-        $requestPathSegments = explode('/', $this->getScriptRequestPathAndFilename());
+        $requestPathSegments = array_filter(
+            explode('/', self::getScriptRequestPathAndFilename($request)),
+            static function ($requestPathSegment) {
+                return $requestPathSegment !== '.';
+            }
+        );
         array_pop($requestPathSegments);
         return implode('/', $requestPathSegments) . '/';
     }
