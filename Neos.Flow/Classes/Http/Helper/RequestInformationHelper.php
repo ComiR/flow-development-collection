@@ -53,7 +53,12 @@ abstract class RequestInformationHelper
     public static function getScriptRequestPath(ServerRequestInterface $request): string
     {
         // FIXME: Shouldn't this be a simple dirname on getScriptRequestPathAndFilename
-        $requestPathSegments = explode('/', self::getScriptRequestPathAndFilename($request));
+        $requestPathSegments = array_filter(
+            explode('/', self::getScriptRequestPathAndFilename($request)),
+            static function ($requestPathSegment) {
+                return $requestPathSegment !== '.';
+            }
+        );
         array_pop($requestPathSegments);
         return implode('/', $requestPathSegments) . '/';
     }
